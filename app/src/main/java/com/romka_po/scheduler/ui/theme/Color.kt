@@ -1,4 +1,4 @@
-package com.romka_po.sheduler.ui.theme
+package com.romka_po.scheduler.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
