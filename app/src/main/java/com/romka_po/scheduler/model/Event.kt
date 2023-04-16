@@ -18,5 +18,4 @@ data class Event(
     val name:String,
     @ColumnInfo
     val description:String?
-
 )

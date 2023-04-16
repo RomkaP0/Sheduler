@@ -1,4 +1,4 @@
-package com.romka_po.sheduler
+package com.romka_po.scheduler
 
 import org.junit.Test
 
