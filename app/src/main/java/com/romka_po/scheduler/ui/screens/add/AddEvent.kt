@@ -2,9 +2,11 @@
 
 package com.romka_po.scheduler.ui.screens.add
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -19,9 +21,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.romka_po.Scheduler.R
 import com.romka_po.scheduler.model.AppNavigatorImpl
 import com.romka_po.scheduler.ui.common.CustomInputField
 import com.romka_po.scheduler.utils.AddScreenInputEvent
@@ -59,6 +64,7 @@ fun AddEvent(
             horizontalAlignment = Alignment.CenterHorizontally
         ){
             val screenState = addViewModel.state.value
+            val context = LocalContext.current
             CustomInputField(
                 value = screenState.text.text,
                 placeholder = "text",
@@ -69,31 +75,37 @@ fun AddEvent(
                 singleLine = true)
             Spacer(modifier = Modifier.size(20.dp))
             CustomInputField(
-                value = screenState.text.text,
+                value = screenState.startdatetime.text,
                 placeholder = "startdatetime",
                 onFocusChange = {addViewModel.createEvent(AddScreenInputEvent.FocusChange("startdatetime"))},
                 onValueChange = {
                     addViewModel.createEvent(AddScreenInputEvent.EnteredStartDateTime(it))
                 },
-                readOnly = true
+                readOnly = true,
+                leadingIcon = { Icon(painterResource(R.drawable.event_24dp), contentDescription = "Hello")},
+                onClick = {Toast.makeText(context,"Text", Toast.LENGTH_SHORT).show()}
             )
             Spacer(modifier = Modifier.size(20.dp))
             CustomInputField(
-                value = screenState.text.text,
+                value = screenState.finishdatetime.text,
                 placeholder = "finishdatetime",
                 onFocusChange = {addViewModel.createEvent(AddScreenInputEvent.FocusChange("finishdatetime"))},
                 onValueChange = {
                     addViewModel.createEvent(AddScreenInputEvent.EnteredFinishDateTime(it))
                 },
-                readOnly = true
-            )
+                readOnly = true,
+                leadingIcon = { Icon(painterResource(R.drawable.event_24dp), contentDescription = "Hello")},
+                onClick = {Toast.makeText(context,"Text", Toast.LENGTH_SHORT).show()}
+
+                )
             Spacer(modifier = Modifier.size(20.dp))
             CustomInputField(
-                value = screenState.text.text,
-                placeholder = "text",
-                onFocusChange = {addViewModel.createEvent(AddScreenInputEvent.FocusChange("text"))},
+                value = screenState.description.text,
+                modifier = Modifier.heightIn(min = 200.dp),
+                placeholder = "description",
+                onFocusChange = {addViewModel.createEvent(AddScreenInputEvent.FocusChange("description"))},
                 onValueChange = {
-                    addViewModel.createEvent(AddScreenInputEvent.EnteredLabel(it))
+                    addViewModel.createEvent(AddScreenInputEvent.EnteredDescription(it))
                 })
         }
     }
