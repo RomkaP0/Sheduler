@@ -23,11 +23,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.romka_po.Scheduler.R
-import com.romka_po.scheduler.model.AppNavigatorImpl
+import com.romka_po.scheduler.model.Event
 import com.romka_po.scheduler.ui.common.CustomInputField
 import com.romka_po.scheduler.utils.AddScreenInputEvent
 
@@ -35,7 +34,9 @@ import com.romka_po.scheduler.utils.AddScreenInputEvent
 fun AddEvent(
     addViewModel: AddViewModel = hiltViewModel()
 
-){
+) {
+    val screenState = addViewModel.state.value
+    val context = LocalContext.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -47,8 +48,23 @@ fun AddEvent(
 
                 },
                 floatingActionButton = {
-                    FloatingActionButton(onClick = {
-                    }) {
+                    FloatingActionButton(
+                        onClick = {
+                            screenState.apply {
+                                if (text.text != "") {
+                                    addViewModel.insertEvent(
+                                        Event(
+                                            date_start = 243,
+                                            date_finish = 5353,
+                                            name = "Test"
+                                        )
+                                    )
+                                } else {
+                                    Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        },
+                    ) {
                         Icon(Icons.Filled.Done, contentDescription = "Add Event")
                     }
                 },
@@ -56,63 +72,71 @@ fun AddEvent(
                 )
         }
     ) {
-        Column (
+        Column(
             modifier = Modifier
                 .padding(it)
                 .padding(20.dp)
-                .fillMaxSize() ,
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            val screenState = addViewModel.state.value
-            val context = LocalContext.current
+        ) {
+
             CustomInputField(
                 value = screenState.text.text,
                 placeholder = "text",
-                onFocusChange = {addViewModel.createEvent(AddScreenInputEvent.FocusChange("text"))},
+                onFocusChange = { addViewModel.fetchEvent(AddScreenInputEvent.FocusChange("text")) },
                 onValueChange = {
-                    addViewModel.createEvent(AddScreenInputEvent.EnteredLabel(it))
+                    addViewModel.fetchEvent(AddScreenInputEvent.EnteredLabel(it))
                 },
-                singleLine = true)
+                singleLine = true
+            )
             Spacer(modifier = Modifier.size(20.dp))
             CustomInputField(
                 value = screenState.startdatetime.text,
                 placeholder = "startdatetime",
-                onFocusChange = {addViewModel.createEvent(AddScreenInputEvent.FocusChange("startdatetime"))},
+                onFocusChange = { addViewModel.fetchEvent(AddScreenInputEvent.FocusChange("startdatetime")) },
                 onValueChange = {
-                    addViewModel.createEvent(AddScreenInputEvent.EnteredStartDateTime(it))
+                    addViewModel.fetchEvent(AddScreenInputEvent.EnteredStartDateTime(it))
                 },
                 readOnly = true,
-                leadingIcon = { Icon(painterResource(R.drawable.event_24dp), contentDescription = "Hello")},
-                onClick = {Toast.makeText(context,"Text", Toast.LENGTH_SHORT).show()}
+                leadingIcon = {
+                    Icon(
+                        painterResource(R.drawable.event_24dp),
+                        contentDescription = "Hello"
+                    )
+                },
+                onClick = { Toast.makeText(context, "Text", Toast.LENGTH_SHORT).show() }
             )
             Spacer(modifier = Modifier.size(20.dp))
             CustomInputField(
                 value = screenState.finishdatetime.text,
                 placeholder = "finishdatetime",
-                onFocusChange = {addViewModel.createEvent(AddScreenInputEvent.FocusChange("finishdatetime"))},
+                onFocusChange = { addViewModel.fetchEvent(AddScreenInputEvent.FocusChange("finishdatetime")) },
                 onValueChange = {
-                    addViewModel.createEvent(AddScreenInputEvent.EnteredFinishDateTime(it))
+                    addViewModel.fetchEvent(AddScreenInputEvent.EnteredFinishDateTime(it))
                 },
                 readOnly = true,
-                leadingIcon = { Icon(painterResource(R.drawable.event_24dp), contentDescription = "Hello")},
-                onClick = {Toast.makeText(context,"Text", Toast.LENGTH_SHORT).show()}
+                leadingIcon = {
+                    Icon(
+                        painterResource(R.drawable.event_24dp),
+                        contentDescription = "Hello"
+                    )
+                },
+                onClick = { Toast.makeText(context, "Text", Toast.LENGTH_SHORT).show() }
 
-                )
+            )
             Spacer(modifier = Modifier.size(20.dp))
             CustomInputField(
                 value = screenState.description.text,
                 modifier = Modifier.heightIn(min = 200.dp),
                 placeholder = "description",
-                onFocusChange = {addViewModel.createEvent(AddScreenInputEvent.FocusChange("description"))},
+                onFocusChange = { addViewModel.fetchEvent(AddScreenInputEvent.FocusChange("description")) },
                 onValueChange = {
-                    addViewModel.createEvent(AddScreenInputEvent.EnteredDescription(it))
+                    addViewModel.fetchEvent(AddScreenInputEvent.EnteredDescription(it))
                 })
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun testAdd(){
-    AddEvent(AddViewModel(AppNavigatorImpl()))
+fun insertEvent() {
+
 }

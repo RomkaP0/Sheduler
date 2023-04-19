@@ -1,8 +1,9 @@
 plugins {
     alias(libs.plugins.com.android.application)
     alias(libs.plugins.org.jetbrains.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.com.google.dagger.hilt.android)
+    alias(libs.plugins.kotlin.kapt)
+
 }
 
 
@@ -22,6 +23,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
     }
 
     buildTypes {
@@ -55,7 +57,7 @@ android {
 }
 
 dependencies {
-
+    kapt(libs.room.compiler)
     kapt(libs.hilt.compiler)
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
@@ -67,9 +69,11 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.navigation)
     implementation(libs.room)
+    implementation(libs.room.runtime)
     implementation(libs.hilt)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.kalendar)
+    implementation(libs.material3.icons.extended)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)

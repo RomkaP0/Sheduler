@@ -5,5 +5,4 @@ data class LoginFormState(
     val startdatetime: InputState = InputState(type = InputType.STARTDATETIME),
     val finishdatetime: InputState = InputState(type = InputType.FINISHDATETIME),
     val description: InputState = InputState(type = InputType.DESCRIPTION),
-    val formValid: Boolean
 )

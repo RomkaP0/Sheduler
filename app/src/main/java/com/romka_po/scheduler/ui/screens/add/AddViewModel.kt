@@ -4,23 +4,32 @@ import android.text.TextUtils
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.romka_po.scheduler.model.AppNavigator
+import com.romka_po.scheduler.model.Event
+import com.romka_po.scheduler.repositories.EventRepository
 import com.romka_po.scheduler.utils.AddScreenInputEvent
 import com.romka_po.scheduler.utils.InputType
 import com.romka_po.scheduler.utils.LoginFormState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddViewModel @Inject constructor(private val appNavigator: AppNavigator) : ViewModel() {
-    private val _state = mutableStateOf(LoginFormState(formValid = true))
+class AddViewModel @Inject constructor(private val appNavigator: AppNavigator, private val repository: EventRepository) : ViewModel() {
+    private val _state = mutableStateOf(LoginFormState())
     val state: State<LoginFormState> = _state
     fun onNavigateToUsersButtonClicked() {
         appNavigator.tryNavigateBack()
     }
 
 
-    fun createEvent(event: AddScreenInputEvent) {
+    fun insertEvent(event: Event) = viewModelScope.launch {
+        repository.insertEvent(event)
+    }
+    
+
+    fun fetchEvent(event: AddScreenInputEvent) {
         onEvent(event)
     }
 
@@ -61,7 +70,6 @@ class AddViewModel @Inject constructor(private val appNavigator: AppNavigator) :
                         _state.value = state.value.copy(
                             text = state.value.text.copy(
                                 isValid = textValid),
-                            formValid = textValid
                         )
                     }
 //                    "startdatetime" -> {
