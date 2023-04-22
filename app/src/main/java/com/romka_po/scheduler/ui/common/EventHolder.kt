@@ -15,11 +15,12 @@ fun EventHolder(
     event: Event,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.padding(start = 4.dp)
+    Column(modifier = modifier.padding(start = 8.dp, top = 8.dp)
+
     ) {
         Text(text = event.name, style = MaterialTheme.typography.bodyMedium)
         TimestampConverter.apply {
-            Text(text = "${convertLongToTime(event.date_start*1000)} - ${convertLongToTime(event.date_finish*1000)}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "${convertLongToTime(event.date_start)} - ${convertLongToTime(event.date_finish)}", style = MaterialTheme.typography.bodyMedium)
 
 
         }

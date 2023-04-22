@@ -18,7 +18,11 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +33,7 @@ import com.romka_po.Scheduler.R
 import com.romka_po.scheduler.model.Event
 import com.romka_po.scheduler.ui.common.CustomInputField
 import com.romka_po.scheduler.utils.AddScreenInputEvent
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddEvent(
@@ -37,6 +42,9 @@ fun AddEvent(
 ) {
     val screenState = addViewModel.state.value
     val context = LocalContext.current
+    val coroutinesScope = rememberCoroutineScope()
+    val startTimePickerState = rememberTimePickerState()
+    val finishTimePickerState = rememberTimePickerState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -52,13 +60,16 @@ fun AddEvent(
                         onClick = {
                             screenState.apply {
                                 if (text.text != "") {
-                                    addViewModel.insertEvent(
-                                        Event(
-                                            date_start = 243,
-                                            date_finish = 5353,
-                                            name = "Test"
+                                    coroutinesScope.launch {
+                                        addViewModel.insertEvent(
+                                            Event(
+                                                date_start = 243,
+                                                date_finish = 5353,
+                                                name = "Test"
+                                            )
                                         )
-                                    )
+                                    }
+
                                 } else {
                                     Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show()
                                 }
@@ -93,7 +104,7 @@ fun AddEvent(
             CustomInputField(
                 value = screenState.startdatetime.text,
                 placeholder = "startdatetime",
-                onFocusChange = { addViewModel.fetchEvent(AddScreenInputEvent.FocusChange("startdatetime")) },
+                onFocusChange = { addViewModel.fetchEvent(AddScreenInputEvent.FocusChange("startdatetime"))},
                 onValueChange = {
                     addViewModel.fetchEvent(AddScreenInputEvent.EnteredStartDateTime(it))
                 },
@@ -137,6 +148,8 @@ fun AddEvent(
     }
 }
 
-fun insertEvent() {
 
+@Composable
+fun ChooseTime(timePickerState:TimePickerState){
+    TimePicker(state = timePickerState)
 }

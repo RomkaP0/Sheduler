@@ -1,6 +1,10 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.romka_po.scheduler.ui.common
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,8 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,14 +27,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.romka_po.scheduler.model.Event
 import java.util.TimeZone
 import kotlin.math.roundToInt
@@ -99,22 +102,17 @@ fun TimeLine(
 
 
 @Composable
-fun TimeLineView(list: List<Event>) {
+fun TimeLineView(list: List<Event?>) {
     val scrollableState = rememberScrollState()
     val dialogState: MutableState<Boolean> = remember {mutableStateOf(false) }
     val eventState: MutableState<Event> = remember {mutableStateOf(Event(-1,0,0, "Something Wrong")) }
 
     if (dialogState.value) {
         Dialog(
-            onDismissRequest = { dialogState.value = false },
-            content = {
-                EventDialog(dialogState = dialogState, event = eventState)
-            },
-            properties = DialogProperties(
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false
-            )
-        )
+            onDismissRequest = { dialogState.value = false }
+        ){
+            EventDialog(dialogState = dialogState, event = eventState, null)
+        }
     } else {
 //        Toast.makeText(ctx, "Dialog Closed", Toast.LENGTH_SHORT).show()
 //        dvm.doSomething()
@@ -128,19 +126,25 @@ fun TimeLineView(list: List<Event>) {
             .padding(horizontal = 4.dp),
         eventBox = { index ->
             val data = list[index]
-            EventHolder(
-                data, modifier = Modifier
-                    .fillMaxWidth(0.8F)
-                    .timeLineBar(data.date_start, data.date_finish)
-                    .background(
-                        Color.Cyan, shape = FloatingActionButtonDefaults.shape
-                    )
-                    .clickable {
-                        eventState.value = data
-                        dialogState.value = true
-                    }
+            if (data != null) {
+                EventHolder(
+                    data, modifier = Modifier
+                        .fillMaxWidth(0.8F)
+                        .timeLineBar(data.date_start, data.date_finish)
+        //                                        .background(
+        //                        color = MaterialTheme.colorScheme.primaryContainer, shape = CardDefaults.outlinedShape)
 
-            )
+
+                        .background(
+                            color = MaterialTheme.colorScheme.surface, shape = CardDefaults.outlinedShape)
+                        .border(width = 4.dp, color = MaterialTheme.colorScheme.primaryContainer, shape = CardDefaults.outlinedShape)
+                        .clickable {
+                            eventState.value = data
+                            dialogState.value = true
+                        }
+
+                )
+            }
         },
     )
 }
@@ -178,28 +182,28 @@ object TimeLineScope {
         startTime: Long,
         finishTime: Long
     ): Modifier {
+        Log.d("CheckOffset",(((((startTime + TimeZone.getDefault().rawOffset )/1000) % 86400)/3600).toString()))
         return then(
             TimeLineParentData(
 
-                duration = (finishTime - startTime) / 3600 / 24F,
-                offset = ((startTime + TimeZone.getDefault().rawOffset / 1000) % 86400 / 3600) / 24F
+                duration = (finishTime - startTime)/1000 / 3600F / 24F,
+                offset = ((((startTime + TimeZone.getDefault().rawOffset )/1000) % 86400) / 3600F) / 24F
             )
         )
     }
 }
+fun check(): MutableList<Event> {
+    val list = mutableListOf<Event>()
+    list.add(Event(1, 1681750800000, 1681772400000, "Hello", null))
+    list.add(Event(4, 1681782400000, 1681802400000, "Hello", "LOREM IPSUMFEHUGEUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"))
 
+    return list
+}
 class TimeLineParentData(
     val duration: Float,
     val offset: Float,
 ) : ParentDataModifier {
     override fun Density.modifyParentData(parentData: Any?) = this@TimeLineParentData
-}
-
-
-fun check(): MutableList<Event> {
-    val list = mutableListOf<Event>()
-    list.add(Event(1, 1681750800, 1681772400, "Hello", null))
-    return list
 }
 
 @Preview
