@@ -1,38 +1,38 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
 package com.romka_po.scheduler.ui.screens.add
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TimePickerState
-import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.romka_po.Scheduler.R
 import com.romka_po.scheduler.model.Event
-import com.romka_po.scheduler.ui.common.CustomInputField
-import com.romka_po.scheduler.utils.AddScreenInputEvent
+import com.romka_po.scheduler.ui.common.InsertDateTimeField
+import com.romka_po.scheduler.utils.AddScreenEvent
+import com.romka_po.scheduler.utils.TimestampConverter
 import kotlinx.coroutines.launch
 
 @Composable
@@ -40,11 +40,12 @@ fun AddEvent(
     addViewModel: AddViewModel = hiltViewModel()
 
 ) {
-    val screenState = addViewModel.state.value
     val context = LocalContext.current
     val coroutinesScope = rememberCoroutineScope()
-    val startTimePickerState = rememberTimePickerState()
-    val finishTimePickerState = rememberTimePickerState()
+    val inputState = addViewModel.state.value
+
+
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -58,20 +59,22 @@ fun AddEvent(
                 floatingActionButton = {
                     FloatingActionButton(
                         onClick = {
-                            screenState.apply {
-                                if (text.text != "") {
+                            inputState.apply {
+                                if (label.text != "") {
                                     coroutinesScope.launch {
                                         addViewModel.insertEvent(
                                             Event(
-                                                date_start = 243,
-                                                date_finish = 5353,
-                                                name = "Test"
+                                                date_start = TimestampConverter.convertStringToTimestamp(start_time.text),
+                                                date_finish = TimestampConverter.convertStringToTimestamp(finish_time.text),
+                                                name = label.text,
+                                                description = desc.text
                                             )
                                         )
                                     }
+                                    addViewModel.onNavigateToUsersButtonClicked()
 
                                 } else {
-                                    Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Put Label", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         },
@@ -83,73 +86,55 @@ fun AddEvent(
                 )
         }
     ) {
-        Column(
+        FlowColumn(
             modifier = Modifier
                 .padding(it)
-                .padding(20.dp)
+//                .padding(20.dp)
                 .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.SpaceEvenly,
         ) {
 
-            CustomInputField(
-                value = screenState.text.text,
-                placeholder = "text",
-                onFocusChange = { addViewModel.fetchEvent(AddScreenInputEvent.FocusChange("text")) },
-                onValueChange = {
-                    addViewModel.fetchEvent(AddScreenInputEvent.EnteredLabel(it))
-                },
-                singleLine = true
+
+            OutlinedTextField(
+                value = inputState.label.text,
+                onValueChange = { addViewModel.onEvent(AddScreenEvent.PutLabel(it)) },
+                label = { Text("Label") },
+                singleLine = true,
             )
-            Spacer(modifier = Modifier.size(20.dp))
-            CustomInputField(
-                value = screenState.startdatetime.text,
-                placeholder = "startdatetime",
-                onFocusChange = { addViewModel.fetchEvent(AddScreenInputEvent.FocusChange("startdatetime"))},
-                onValueChange = {
-                    addViewModel.fetchEvent(AddScreenInputEvent.EnteredStartDateTime(it))
+            InsertDateTimeField(
+
+                value = inputState.start_time.text,
+                label = "Start",
+                trailingIcon = {
+                    Icon(Icons.Default.Event, "startTime")
                 },
-                readOnly = true,
-                leadingIcon = {
-                    Icon(
-                        painterResource(R.drawable.event_24dp),
-                        contentDescription = "Hello"
-                    )
-                },
-                onClick = { Toast.makeText(context, "Text", Toast.LENGTH_SHORT).show() }
+                provide = {addViewModel.onEvent(AddScreenEvent.PutStartTime(it))}
             )
-            Spacer(modifier = Modifier.size(20.dp))
-            CustomInputField(
-                value = screenState.finishdatetime.text,
-                placeholder = "finishdatetime",
-                onFocusChange = { addViewModel.fetchEvent(AddScreenInputEvent.FocusChange("finishdatetime")) },
-                onValueChange = {
-                    addViewModel.fetchEvent(AddScreenInputEvent.EnteredFinishDateTime(it))
+            InsertDateTimeField(
+                value = inputState.finish_time.text,
+                label = "Finish",
+                trailingIcon = {
+                    Icon(Icons.Default.Event, "finishTime")
                 },
-                readOnly = true,
-                leadingIcon = {
-                    Icon(
-                        painterResource(R.drawable.event_24dp),
-                        contentDescription = "Hello"
-                    )
-                },
-                onClick = { Toast.makeText(context, "Text", Toast.LENGTH_SHORT).show() }
+                provide = {addViewModel.onEvent(AddScreenEvent.PutFinishTime(it))}
 
             )
-            Spacer(modifier = Modifier.size(20.dp))
-            CustomInputField(
-                value = screenState.description.text,
+            OutlinedTextField(
+                value = inputState.desc.text,
+                onValueChange = { addViewModel.onEvent(AddScreenEvent.PutDesc(it)) },
                 modifier = Modifier.heightIn(min = 200.dp),
-                placeholder = "description",
-                onFocusChange = { addViewModel.fetchEvent(AddScreenInputEvent.FocusChange("description")) },
-                onValueChange = {
-                    addViewModel.fetchEvent(AddScreenInputEvent.EnteredDescription(it))
-                })
+                label = { Text("description") },
+            )
         }
+
     }
 }
 
 
+@Preview
 @Composable
-fun ChooseTime(timePickerState:TimePickerState){
-    TimePicker(state = timePickerState)
+fun TestDialog() {
+//    EventDialog(remember{mutableStateOf(true)})
 }
+

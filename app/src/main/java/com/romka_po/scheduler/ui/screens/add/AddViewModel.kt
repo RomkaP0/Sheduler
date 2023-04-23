@@ -1,24 +1,80 @@
 package com.romka_po.scheduler.ui.screens.add
 
-import android.text.TextUtils
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.romka_po.scheduler.model.AppNavigator
+import com.romka_po.scheduler.model.Destination
 import com.romka_po.scheduler.model.Event
 import com.romka_po.scheduler.repositories.EventRepository
-import com.romka_po.scheduler.utils.AddScreenInputEvent
-import com.romka_po.scheduler.utils.InputType
-import com.romka_po.scheduler.utils.LoginFormState
+import com.romka_po.scheduler.utils.AddEventStates
+import com.romka_po.scheduler.utils.AddScreenEvent
+import com.romka_po.scheduler.utils.TimestampConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddViewModel @Inject constructor(private val appNavigator: AppNavigator, private val repository: EventRepository) : ViewModel() {
-    private val _state = mutableStateOf(LoginFormState())
-    val state: State<LoginFormState> = _state
+class AddViewModel @Inject constructor(
+    private val appNavigator: AppNavigator,
+    private val repository: EventRepository,
+    savedStateHandle: SavedStateHandle
+
+) : ViewModel() {
+    private val _state = mutableStateOf(AddEventStates())
+    val state: State<AddEventStates> = _state
+
+
+    init {
+        val timestamp:String = savedStateHandle.get<String>(Destination.AddEvent.date_key) ?: ""
+        if (timestamp!=""){
+            onEvent(AddScreenEvent.PutStartTime(timestamp.toLong()))
+        }
+    }
+    fun onEvent(event: AddScreenEvent) {
+        when (event) {
+            is AddScreenEvent.PutLabel -> {
+                _state.value = state.value.copy(
+                    label = state.value.label.copy(
+                        text = event.value
+                    )
+                )
+            }
+            is AddScreenEvent.PutStartTime -> {
+                _state.value = state.value.copy(
+                    start_time = state.value.start_time.copy(
+                        text = TimestampConverter.convertLongToDateTime(event.value)
+                    ),
+
+                    finish_time = state.value.finish_time.copy(
+                        text = TimestampConverter.convertLongToDateTime(event.value+3600000)
+                    )
+                )
+                Log.d("ViewModel", event.value.toString())
+
+            }
+            is AddScreenEvent.PutFinishTime -> {
+                _state.value = state.value.copy(
+                    finish_time = state.value.finish_time.copy(
+                        text = TimestampConverter.convertLongToDateTime(event.value)
+                    )
+                )
+            }
+            is AddScreenEvent.PutDesc -> {
+                _state.value = state.value.copy(
+                    desc = state.value.desc.copy(
+                        text = event.value
+                    )
+                )
+            }
+
+        }
+    }
+
+
     fun onNavigateToUsersButtonClicked() {
         appNavigator.tryNavigateBack()
     }
@@ -27,80 +83,5 @@ class AddViewModel @Inject constructor(private val appNavigator: AppNavigator, p
     fun insertEvent(event: Event) = viewModelScope.launch {
         repository.insertEvent(event)
     }
-    
 
-    fun fetchEvent(event: AddScreenInputEvent) {
-        onEvent(event)
-    }
-
-    private fun onEvent(event: AddScreenInputEvent) {
-        when (event) {
-            is AddScreenInputEvent.EnteredLabel -> {
-                _state.value = state.value.copy(
-                    text = state.value.text.copy(
-                        text = event.value
-                    )
-                )
-            }
-            is AddScreenInputEvent.EnteredStartDateTime -> {
-                _state.value = state.value.copy(
-                    startdatetime = state.value.startdatetime.copy(
-                        text = event.value
-                    )
-                )
-            }
-            is AddScreenInputEvent.EnteredFinishDateTime -> {
-                _state.value = state.value.copy(
-                    finishdatetime = state.value.finishdatetime.copy(
-                        text = event.value
-                    )
-                )
-            }
-            is AddScreenInputEvent.EnteredDescription -> {
-                _state.value = state.value.copy(
-                    description = state.value.description.copy(
-                        text = event.value
-                    )
-                )
-            }
-            is AddScreenInputEvent.FocusChange -> {
-                when (event.focusFieldName) {
-                    "text" -> {
-                        val textValid = validateInput(state.value.text.text, InputType.TEXT)
-                        _state.value = state.value.copy(
-                            text = state.value.text.copy(
-                                isValid = textValid),
-                        )
-                    }
-//                    "startdatetime" -> {
-//                        val passwordValid = validateInput(
-//                            state.value.password.text,
-//                            InputType.PASSWORD
-//                        )
-//                        _state.value = state.value.copy(
-//                            password = state.value.password.copy(
-//                                isValid = passwordValid),
-//                            formValid = passwordValid
-//                        )
-//                    }
-                }
-            }
-        }
-    }
-
-    private fun validateInput(inputValue: String, inputType: InputType): Boolean {
-        when (inputType) {
-            InputType.TEXT -> {
-                return !TextUtils.isEmpty(inputValue)
-            }
-//            InputType. -> {
-//                return !TextUtils.isEmpty(inputValue) && inputValue.length > 5
-//
-//            }
-
-
-            else -> {return true}
-        }
-
-    }
 }

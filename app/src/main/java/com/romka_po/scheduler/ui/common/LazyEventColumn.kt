@@ -2,7 +2,6 @@
 
 package com.romka_po.scheduler.ui.common
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -102,22 +100,31 @@ fun TimeLine(
 
 
 @Composable
-fun TimeLineView(list: List<Event?>) {
+fun TimeLineView(list: List<Event?>, startTime: Long = 0, dropEvent:((Event) -> Unit)?) {
     val scrollableState = rememberScrollState()
-    val dialogState: MutableState<Boolean> = remember {mutableStateOf(false) }
-    val eventState: MutableState<Event> = remember {mutableStateOf(Event(-1,0,0, "Something Wrong")) }
+    val dialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
+    val eventState: MutableState<Event> = remember {
+        mutableStateOf(Event( 0, 0, "Something Wrong",null,-1))
+    }
+
 
     if (dialogState.value) {
         Dialog(
             onDismissRequest = { dialogState.value = false }
-        ){
-            EventDialog(dialogState = dialogState, event = eventState, null)
+        ) {
+            EventDialog(dialogState = dialogState, event = eventState.value, dropEvent)
         }
     } else {
 //        Toast.makeText(ctx, "Dialog Closed", Toast.LENGTH_SHORT).show()
 //        dvm.doSomething()
     }
+    var finishTimeWithOffset: Long = Long.MAX_VALUE
+    var startTimeWithOffset:Long =0
+    if (startTime != 0.toLong()) {
+        startTimeWithOffset = startTime - TimeZone.getDefault().rawOffset
+        finishTimeWithOffset = startTimeWithOffset + 86400000
 
+    }
     TimeLine(
         hoursLabel = { HoursHeader() },
         rowCount = list.size,
@@ -127,28 +134,67 @@ fun TimeLineView(list: List<Event?>) {
         eventBox = { index ->
             val data = list[index]
             if (data != null) {
-                EventHolder(
-                    data, modifier = Modifier
-                        .fillMaxWidth(0.8F)
-                        .timeLineBar(data.date_start, data.date_finish)
-        //                                        .background(
-        //                        color = MaterialTheme.colorScheme.primaryContainer, shape = CardDefaults.outlinedShape)
+//                if ((data.date_start >= startTimeWithOffset) && (data.date_finish <= finishTime))
+                if (!((data.date_start>=finishTimeWithOffset)||(data.date_finish<=startTimeWithOffset)))
+                    EventHolder(
+                        data, modifier = Modifier
+                            .fillMaxWidth(0.8F)
+                            .timeLineBar(data.date_start, data.date_finish,startTimeWithOffset, finishTimeWithOffset)
+                            //                                        .background(
+                            //                        color = MaterialTheme.colorScheme.primaryContainer, shape = CardDefaults.outlinedShape)
 
 
-                        .background(
-                            color = MaterialTheme.colorScheme.surface, shape = CardDefaults.outlinedShape)
-                        .border(width = 4.dp, color = MaterialTheme.colorScheme.primaryContainer, shape = CardDefaults.outlinedShape)
-                        .clickable {
-                            eventState.value = data
-                            dialogState.value = true
-                        }
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = CardDefaults.outlinedShape
+                            )
+                            .border(
+                                width = 4.dp,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = CardDefaults.outlinedShape
+                            )
+                            .clickable {
+                                eventState.value = data
+                                dialogState.value = true
+                            }
 
-                )
+                    )
             }
         },
     )
 }
+@LayoutScopeMarker
+@Immutable
+object TimeLineScope {
+    @Stable
+    fun Modifier.timeLineBar(
+        startTime: Long,
+        finishTime: Long,
+        startDayTime:Long,
+        finishDayTime:Long,
+    ): Modifier {
 
+        val st = if ((startTime)<startDayTime) startDayTime else (startTime )
+        val fin = if ((finishTime)>finishDayTime) finishDayTime else (finishTime)
+//
+//        val st  =startTime
+//        val fin = finishTime
+        return then(
+            TimeLineParentData(
+
+                duration = (fin - st) / 1000 / 3600F / 24F,
+                offset = ((((st +TimeZone.getDefault().rawOffset)/ 1000) % 86400) / 3600F) / 24F
+            )
+        )
+    }
+}
+
+class TimeLineParentData(
+    val duration: Float,
+    val offset: Float,
+) : ParentDataModifier {
+    override fun Density.modifyParentData(parentData: Any?) = this@TimeLineParentData
+}
 
 @Composable
 private fun HoursHeader() {
@@ -174,40 +220,3 @@ private fun HoursHeader() {
     }
 }
 
-@LayoutScopeMarker
-@Immutable
-object TimeLineScope {
-    @Stable
-    fun Modifier.timeLineBar(
-        startTime: Long,
-        finishTime: Long
-    ): Modifier {
-        Log.d("CheckOffset",(((((startTime + TimeZone.getDefault().rawOffset )/1000) % 86400)/3600).toString()))
-        return then(
-            TimeLineParentData(
-
-                duration = (finishTime - startTime)/1000 / 3600F / 24F,
-                offset = ((((startTime + TimeZone.getDefault().rawOffset )/1000) % 86400) / 3600F) / 24F
-            )
-        )
-    }
-}
-fun check(): MutableList<Event> {
-    val list = mutableListOf<Event>()
-    list.add(Event(1, 1681750800000, 1681772400000, "Hello", null))
-    list.add(Event(4, 1681782400000, 1681802400000, "Hello", "LOREM IPSUMFEHUGEUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"))
-
-    return list
-}
-class TimeLineParentData(
-    val duration: Float,
-    val offset: Float,
-) : ParentDataModifier {
-    override fun Density.modifyParentData(parentData: Any?) = this@TimeLineParentData
-}
-
-@Preview
-@Composable
-fun TimeLineViewTest() {
-    TimeLineView(list = check())
-}

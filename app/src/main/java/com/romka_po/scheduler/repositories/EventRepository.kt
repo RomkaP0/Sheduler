@@ -8,8 +8,6 @@ import javax.inject.Inject
 class EventRepository @Inject constructor (
     private val eventDao: EventDao
 ){
-    fun getDayEvents(date_start:Long, date_finish:Long): Flow<List<Event>> = eventDao.getDayEvents(date_start,date_finish)
-
     fun getEvent(): Flow<List<Event>> =eventDao.getEvents()
     suspend fun insertEvent(event: Event)  =eventDao.insert(event)
 
