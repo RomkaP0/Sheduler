@@ -1,9 +1,11 @@
 package com.romka_po.scheduler.utils
 
+import android.annotation.SuppressLint
 import java.sql.Timestamp
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
+@SuppressLint("SimpleDateFormat")
 
 object TimestampConverter {
     fun convertLongToDateTime(time: Long): String {
@@ -34,7 +36,7 @@ object TimestampConverter {
         var timestamp: Timestamp? = null
         val parsedDate: Date
         try {
-            parsedDate = dateFormat!!.parse(something)
+            parsedDate = dateFormat!!.parse(something)!!
             timestamp = Timestamp(parsedDate.time)
         } catch (e: ParseException) {
             e.printStackTrace()

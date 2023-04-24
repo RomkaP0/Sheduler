@@ -47,8 +47,6 @@ fun InsertDateTimeField(
                 datePickerState
             )
         }
-    } else {
-
     }
     OutlinedTextField(
         value = value,

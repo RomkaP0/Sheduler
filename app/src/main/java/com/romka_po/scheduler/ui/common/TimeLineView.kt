@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.romka_po.scheduler.ui.common
 
 import androidx.compose.foundation.background
@@ -15,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +20,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
@@ -100,12 +97,13 @@ fun TimeLine(
 
 
 @Composable
-fun TimeLineView(list: List<Event?>, startTime: Long = 0, dropEvent:((Event) -> Unit)?) {
+fun TimeLineView(list: List<Event?>,
+                 startTime: Long = 0,
+                 dropEvent:((Event) -> Unit)?,
+                 dialogState: MutableState<Boolean>,
+                 eventState: MutableState<Event>) {
     val scrollableState = rememberScrollState()
-    val dialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
-    val eventState: MutableState<Event> = remember {
-        mutableStateOf(Event( 0, 0, "Something Wrong",null,-1))
-    }
+
 
 
     if (dialogState.value) {
@@ -135,7 +133,12 @@ fun TimeLineView(list: List<Event?>, startTime: Long = 0, dropEvent:((Event) -> 
                     EventHolder(
                         data, modifier = Modifier
                             .fillMaxWidth(0.8F)
-                            .timeLineBar(data.date_start, data.date_finish,startTimeWithOffset, finishTimeWithOffset)
+                            .timeLineBar(
+                                data.date_start,
+                                data.date_finish,
+                                startTimeWithOffset,
+                                finishTimeWithOffset
+                            )
 
                             .background(
                                 color = MaterialTheme.colorScheme.surface,

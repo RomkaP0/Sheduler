@@ -1,11 +1,10 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.romka_po.scheduler.ui.screens.show
 
 import android.util.Log
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -118,11 +117,14 @@ fun ShowContent(datePickerState:DatePickerState, noteListState: State<List<Event
 
     TimeLineView(
         list = noteListState.value,
-        datePickerState.selectedDateMillis!!,
+        startTime = datePickerState.selectedDateMillis!!,
         dropEvent = {
             composableScope.launch {
                 showViewModel.dropEvent(event = it)
             }
-        })
+        },
+        dialogState = showViewModel.dialogState,
+        eventState = showViewModel.currentEventState
+    )
 }
 
