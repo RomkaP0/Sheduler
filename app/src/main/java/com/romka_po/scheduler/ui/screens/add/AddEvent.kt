@@ -1,11 +1,12 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.romka_po.scheduler.ui.screens.add
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowColumn
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -26,11 +27,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.romka_po.scheduler.model.Event
 import com.romka_po.scheduler.ui.common.InsertDateTimeField
+import com.romka_po.scheduler.utils.AddEventStates
 import com.romka_po.scheduler.utils.AddScreenEvent
 import com.romka_po.scheduler.utils.TimestampConverter
 import kotlinx.coroutines.launch
@@ -43,7 +44,6 @@ fun AddEvent(
     val context = LocalContext.current
     val coroutinesScope = rememberCoroutineScope()
     val inputState = addViewModel.state.value
-
 
 
     Scaffold(
@@ -64,8 +64,12 @@ fun AddEvent(
                                     coroutinesScope.launch {
                                         addViewModel.insertEvent(
                                             Event(
-                                                date_start = TimestampConverter.convertStringToTimestamp(start_time.text),
-                                                date_finish = TimestampConverter.convertStringToTimestamp(finish_time.text),
+                                                date_start = TimestampConverter.convertStringToTimestamp(
+                                                    start_time.text
+                                                ),
+                                                date_finish = TimestampConverter.convertStringToTimestamp(
+                                                    finish_time.text
+                                                ),
                                                 name = label.text,
                                                 description = desc.text
                                             )
@@ -86,55 +90,71 @@ fun AddEvent(
                 )
         }
     ) {
-        FlowColumn(
+        BoxWithConstraints(
             modifier = Modifier
                 .padding(it)
 //                .padding(20.dp)
                 .fillMaxSize(),
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.SpaceEvenly,
         ) {
+            if (maxHeight>maxWidth){
+                Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceEvenly, horizontalAlignment = Alignment.CenterHorizontally){
+                    AddScreenContent(inputState = inputState, addViewModel = addViewModel)
+                    OutlinedTextField(
+                        value = inputState.desc.text,
+                        onValueChange = { addViewModel.onEvent(AddScreenEvent.PutDesc(it)) },
+                        modifier = Modifier.heightIn(min = 200.dp),
+                        label = { Text("description") },
+                    )
+                }
+            }
+            else{
+                Row (modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.SpaceEvenly){
+                    Column (verticalArrangement = Arrangement.SpaceBetween){
+                        AddScreenContent(inputState = inputState, addViewModel = addViewModel)
 
+                    }
+                    OutlinedTextField(
+                        value = inputState.desc.text,
+                        onValueChange = { addViewModel.onEvent(AddScreenEvent.PutDesc(it)) },
+                        modifier = Modifier.heightIn(min = 200.dp),
+                        label = { Text("description") },
+                    )
+                }
+            }
 
-            OutlinedTextField(
-                value = inputState.label.text,
-                onValueChange = { addViewModel.onEvent(AddScreenEvent.PutLabel(it)) },
-                label = { Text("Label") },
-                singleLine = true,
-            )
-            InsertDateTimeField(
-
-                value = inputState.start_time.text,
-                label = "Start",
-                trailingIcon = {
-                    Icon(Icons.Default.Event, "startTime")
-                },
-                provide = {addViewModel.onEvent(AddScreenEvent.PutStartTime(it))}
-            )
-            InsertDateTimeField(
-                value = inputState.finish_time.text,
-                label = "Finish",
-                trailingIcon = {
-                    Icon(Icons.Default.Event, "finishTime")
-                },
-                provide = {addViewModel.onEvent(AddScreenEvent.PutFinishTime(it))}
-
-            )
-            OutlinedTextField(
-                value = inputState.desc.text,
-                onValueChange = { addViewModel.onEvent(AddScreenEvent.PutDesc(it)) },
-                modifier = Modifier.heightIn(min = 200.dp),
-                label = { Text("description") },
-            )
         }
-
     }
 }
 
-
-@Preview
 @Composable
-fun TestDialog() {
-//    EventDialog(remember{mutableStateOf(true)})
+fun AddScreenContent(inputState:AddEventStates, addViewModel: AddViewModel) {
+
+
+    OutlinedTextField(
+        value = inputState.label.text,
+        onValueChange = { addViewModel.onEvent(AddScreenEvent.PutLabel(it)) },
+        label = { Text("Label") },
+        singleLine = true,
+    )
+    InsertDateTimeField(
+
+        value = inputState.start_time.text,
+        label = "Start",
+        trailingIcon = {
+            Icon(Icons.Default.Event, "startTime")
+        },
+        provide = { addViewModel.onEvent(AddScreenEvent.PutStartTime(it)) }
+    )
+    InsertDateTimeField(
+        value = inputState.finish_time.text,
+        label = "Finish",
+        trailingIcon = {
+            Icon(Icons.Default.Event, "finishTime")
+        },
+        provide = { addViewModel.onEvent(AddScreenEvent.PutFinishTime(it)) }
+
+    )
+
 }
+
 

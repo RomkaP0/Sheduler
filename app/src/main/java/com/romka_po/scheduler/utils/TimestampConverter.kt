@@ -37,7 +37,6 @@ object TimestampConverter {
             parsedDate = dateFormat!!.parse(something)
             timestamp = Timestamp(parsedDate.time)
         } catch (e: ParseException) {
-            // TODO Auto-generated catch block
             e.printStackTrace()
         }
         return timestamp!!.time

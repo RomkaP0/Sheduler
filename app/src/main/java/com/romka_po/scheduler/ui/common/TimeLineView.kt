@@ -79,7 +79,7 @@ fun TimeLine(
 
         layout(constraints.maxWidth, totalHeight) {
 //            var xPosition = hoursLabelPlaceable.width + 20
-            var xPosition = 190
+            val xPosition = 190
 
             hoursLabelPlaceable.place(0, 0)
 
@@ -114,9 +114,6 @@ fun TimeLineView(list: List<Event?>, startTime: Long = 0, dropEvent:((Event) -> 
         ) {
             EventDialog(dialogState = dialogState, event = eventState.value, dropEvent)
         }
-    } else {
-//        Toast.makeText(ctx, "Dialog Closed", Toast.LENGTH_SHORT).show()
-//        dvm.doSomething()
     }
     var finishTimeWithOffset: Long = Long.MAX_VALUE
     var startTimeWithOffset:Long =0
@@ -134,15 +131,11 @@ fun TimeLineView(list: List<Event?>, startTime: Long = 0, dropEvent:((Event) -> 
         eventBox = { index ->
             val data = list[index]
             if (data != null) {
-//                if ((data.date_start >= startTimeWithOffset) && (data.date_finish <= finishTime))
                 if (!((data.date_start>=finishTimeWithOffset)||(data.date_finish<=startTimeWithOffset)))
                     EventHolder(
                         data, modifier = Modifier
                             .fillMaxWidth(0.8F)
                             .timeLineBar(data.date_start, data.date_finish,startTimeWithOffset, finishTimeWithOffset)
-                            //                                        .background(
-                            //                        color = MaterialTheme.colorScheme.primaryContainer, shape = CardDefaults.outlinedShape)
-
 
                             .background(
                                 color = MaterialTheme.colorScheme.surface,
@@ -176,9 +169,7 @@ object TimeLineScope {
 
         val st = if ((startTime)<startDayTime) startDayTime else (startTime )
         val fin = if ((finishTime)>finishDayTime) finishDayTime else (finishTime)
-//
-//        val st  =startTime
-//        val fin = finishTime
+
         return then(
             TimeLineParentData(
 

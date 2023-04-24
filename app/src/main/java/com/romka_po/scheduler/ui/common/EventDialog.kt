@@ -46,14 +46,15 @@ fun EventDialog(
                 Text(text = "Finish: ${TimestampConverter.convertLongToDateTime(date_finish)}", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(8.dp))
                 description?.let { Text(text = "Description: $it", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(8.dp)) }
             }
-            Row(modifier = Modifier.padding(8.dp)) {
+            Row(modifier = Modifier.padding(8.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly) {
                 OutlinedIconButton(onClick = { onDrop?.let { it(event) }; dialogState.value=false}) {
                     Icon(Icons.Default.Delete, contentDescription = "onDelete")
                 }
-//                OutlinedIconButton(onClick = { dropDialog(onDrop = onDrop, dialogState=dialogState)}) {
-//                    Icon(Icons.Default.Edit, contentDescription = "onEdit")
-//                }
-                Button(onClick = {dialogState.value=false}){}
+
+                Button(onClick = {dialogState.value=false}){
+                    Text(text = "Close")
+                }
             }
         }
     }
